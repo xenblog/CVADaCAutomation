@@ -1,0 +1,631 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "westeurope",
+            "type": "string"
+        },
+        "ccc01": {
+            "defaultValue": "az-ccc01",
+            "type": "String"
+        },
+        "ccc02": {
+            "defaultValue": "az-ccc02",
+            "type": "String"
+        },
+        "cmf01": {
+            "defaultValue": "az-cmf01",
+            "type": "String"
+        },
+        "cmf02": {
+            "defaultValue": "az-cmf02",
+            "type": "String"
+        },
+        "availabilitySets_CloudConnectors_name": {
+            "defaultValue": "CloudConnectors",
+            "type": "String"
+        },
+        "availabilitySets_FASServers_name": {
+            "defaultValue": "FASServers",
+            "type": "String"
+        },
+        "subnetName": {
+            "type": "string"
+        },
+        "virtualNetworkResourceGroup": {
+            "type": "string",
+            "defaultValue": "WEU-CVADaC-Networking"
+        },
+        "virtualNetworks_vNet_name": {
+            "defaultValue": "WEU-VNZ-CVAD-vNet",
+            "type": "String"
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2_v2"
+        },
+        "osDiskType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+              "Standard_LRS",  
+              "StandardSSD_LRS",
+              "PremiumSSD_LRS"
+            ],
+            "metadata": {
+              "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "2019-Datacenter",
+            "allowedValues": [
+                "2016-Datacenter",  
+                "2019-Datacenter"
+              ]
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "azurelocaladmin"
+        },
+        "adminPassword": {
+            "type": "secureString"
+        },
+        "OUPath": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "ex. OU=MyCorpComputers,DC=Contoso,DC=com"
+            }
+        },
+        "domainToJoin": {
+            "type": "string",
+            "metadata": {
+                "description": "The FQDN of the AD domain"
+            }
+        },
+        "domainUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username of the account on the domain"
+            }
+        },
+        "domainPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of the account on the domain"
+            }
+        },
+        "domainJoinOptions": {
+            "type": "int",
+            "defaultValue": 3,
+            "metadata": {
+                "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+            }
+        }
+    },
+    "variables": {
+        "networkInterfaces_CCC01_name": "[concat(parameters('ccc01'), '_Nic0')]",
+        "networkInterfaces_CCC02_name": "[concat(parameters('ccc02'), '_Nic0')]",
+        "networkInterfaces_CMF01_name": "[concat(parameters('cmf01'), '_Nic0')]",
+        "networkInterfaces_CMF02_name": "[concat(parameters('cmf02'), '_Nic0')]",
+        "virtualNetworkId": "[concat('/subscriptions/adbd9a10-d215-4156-b35f-6898be0c1e51/resourceGroups/', parameters('virtualNetworkResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworks_vNet_name'))]",
+        "vnetId": "[variables('virtualNetworkId')]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('networkInterfaces_CCC01_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('networkInterfaces_CCC02_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('networkInterfaces_CMF01_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('networkInterfaces_CMF02_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('availabilitySets_CloudConnectors_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformUpdateDomainCount": 1,
+                "platformFaultDomainCount": 1,
+                "virtualMachines": [
+                    {
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ccc01'))]"
+                    },
+                    {
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ccc02'))]"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('availabilitySets_FasServers_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+            ],
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformUpdateDomainCount": 1,
+                "platformFaultDomainCount": 1,
+                "virtualMachines": [
+                    {
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', parameters('cmf01'))]"
+                    },
+                    {
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', parameters('cmf02'))]"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('ccc01')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_CloudConnectors_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CCC01_name'))]"
+            ],
+            "tags": {
+                "CreatedBy": "edgemo",
+                "Description": "Cloud Connector"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_CloudConnectors_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('ccc01'), '_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('ccc01')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CCC01_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('ccc02')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_CloudConnectors_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CCC02_name'))]"
+            ],
+            "tags": {
+                "CreatedBy": "edgemo",
+                "Description": "Cloud Connector"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_CloudConnectors_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('ccc02'), '_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('ccc02')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CCC02_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('cmf01')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_fasservers_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CMF01_name'))]"
+            ],
+            "tags": {
+                "CreatedBy": "edgemo",
+                "Description": "FAS Server"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_fasservers_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('cmf01'), '_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('cmf01')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CMF01_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('cmf02')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_fasservers_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CMF02_name'))]"
+            ],
+            "tags": {
+                "CreatedBy": "edgemo",
+                "Description": "FAS Server"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySets_fasservers_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('cmf02'), '_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('cmf02')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_CMF02_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2015-06-15",
+            "name": "[concat(parameters('ccc01'),'/joindomain')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('ccc01'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('domainToJoin')]",
+                    "OUPath": "[parameters('ouPath')]",
+                    "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
+                    "Restart": "true",
+                    "Options": "[parameters('domainJoinOptions')]"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('domainPassword')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2015-06-15",
+            "name": "[concat(parameters('ccc02'),'/joindomain')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('ccc02'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('domainToJoin')]",
+                    "OUPath": "[parameters('ouPath')]",
+                    "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
+                    "Restart": "true",
+                    "Options": "[parameters('domainJoinOptions')]"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('domainPassword')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2015-06-15",
+            "name": "[concat(parameters('cmf01'),'/joindomain')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('cmf01'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('domainToJoin')]",
+                    "OUPath": "[parameters('ouPath')]",
+                    "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
+                    "Restart": "true",
+                    "Options": "[parameters('domainJoinOptions')]"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('domainPassword')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2015-06-15",
+            "name": "[concat(parameters('cmf02'),'/joindomain')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('cmf02'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[parameters('domainToJoin')]",
+                    "OUPath": "[parameters('ouPath')]",
+                    "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
+                    "Restart": "true",
+                    "Options": "[parameters('domainJoinOptions')]"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('domainPassword')]"
+                }
+            }
+        }
+    ]
+}

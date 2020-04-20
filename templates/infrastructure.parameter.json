@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "westeurope"
+        },
+        "ccc01": {
+            "value": "az-ccc01"
+        },
+        "ccc02": {
+            "value": "az-ccc02"
+        },
+        "cmf01": {
+            "value": "az-cmf01"
+        },
+        "cmf02": {
+            "value": "az-cmf02"
+        },
+        "availabilitySets_CloudConnectors_name": {
+            "value": "CloudConnectors"
+        },
+        "availabilitySets_fasservers_name": {
+            "value": "FASServers"
+        },
+        "subnetName": {
+            "value": "ManagementZone"
+        },
+        "virtualNetworkResourceGroup": {
+            "value": "WEU-CVADaC-Networking"
+        },
+        "virtualNetworks_vNet_name": {
+            "value": "WEU_CVAD_vNet"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_A2_v2"
+        },
+        "osDiskType": {
+            "value": "StandardSSD_LRS"
+        },
+        "adminUsername": {
+            "value": "azurelocaladmin"
+        },
+        "adminPassword": {
+            "reference": {
+              "keyVault": {
+              "id": "/subscriptions/adbd9a10-d215-4156-b35f-6898be0c1e51/resourceGroups/WEU-CVADaC-Security/providers/Microsoft.KeyVault/vaults/CVADaC-KeyVault"
+              },
+              "secretName": "StandardVmAdminPassword"
+            }
+        },
+        "OUPath": {
+            "value": "string"
+        },
+        "domainToJoin": {
+            "value": "xenblog.dk"
+        },
+        "domainUsername": {
+            "value": "adm.niels"
+        },
+        "domainPassword": {
+            "reference": {
+                "keyVault": {
+                "id": "/subscriptions/adbd9a10-d215-4156-b35f-6898be0c1e51/resourceGroups/WEU-CVADaC-Security/providers/Microsoft.KeyVault/vaults/CVADaC-KeyVault"
+                },
+                "secretName": "adminpassword"
+              }
+        },
+        "domainJoinOptions": {
+            "value": 3
+        }
+    }
+}

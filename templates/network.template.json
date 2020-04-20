@@ -1,0 +1,267 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string"
+        },
+        "dnsServers": {
+            "type": "string",
+            "defaultValue": "8.8.8.8",
+            "metadata": {
+                "description": "DNS Servers for vNet, ex. 1.2.3.4, 6.7.8.9"
+              }
+        },
+        "virtualNetworks_vNet_name": {
+            "defaultValue": "Networking",
+            "type": "String"
+        },
+        "virtualNetworks_vNet_AddressSpace": {
+            "type": "string",
+            "metadata": {
+                "description": "vNet Address Space, ex. 10.10.0.0/16"
+            }
+        },
+        "virtualNetworks_Mgt_Subnet_Name": {
+            "type":"string",
+            "defaultValue": "ManagementZone"
+        },
+        "virtualNetworks_Mgt_Subnet": {
+            "type":"string"
+        },
+        "virtualNetworks_Server_Subnet_Name": {
+            "type":"string",
+            "defaultValue": "ServerZone"
+        },
+        "virtualNetworks_Server_Subnet": {
+            "type":"string"
+        },
+        "virtualNetworks_Static_Subnet_Name": {
+            "type":"string",
+            "defaultValue": "AccessZone_Static"
+        },
+        "virtualNetworks_Static_Subnet": {
+            "type":"string"
+        },
+        "virtualNetworks_Random_Subnet_Name": {
+            "type":"string",
+            "defaultValue": "AccessZone_Random"
+        },
+        "virtualNetworks_Random_Subnet": {
+            "type":"string"
+        },
+        "virtualNetworks_MultiSession_Subnet_Name": {
+            "type":"string",
+            "defaultValue": "AccessZone_MultiSession"
+        },
+        "virtualNetworks_MultiSession_Subnet": {
+            "type":"string"
+        },
+        "virtualNetworks_vNet_Peering_Name": {
+            "type": "string"
+        },
+        "virtualNetworks_vNet_Peering_ResourceId": {
+            "type": "String"
+        },
+        "virtualNetworks_vNet_Peering_Remote_Subnet": {
+            "type": "string"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-11-01",
+            "name": "[parameters('virtualNetworks_vNet_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "CreatedBy": "edgemo"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworks_vNet_AddressSpace')]"
+                    ]
+                },
+                "dhcpOptions": {
+                    "dnsServers": [
+                        "[parameters('dnsServers')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('virtualNetworks_Mgt_Subnet_Name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworks_Mgt_Subnet')]",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "[parameters('virtualNetworks_Server_Subnet_Name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworks_Server_Subnet')]",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "[parameters('virtualNetworks_MultiSession_Subnet_Name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworks_MultiSession_Subnet')]",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "[parameters('virtualNetworks_Random_Subnet_Name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworks_Random_Subnet')]",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "[parameters('virtualNetworks_Static_Subnet_Name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworks_Static_Subnet')]",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [
+                    {
+                        "name": "[parameters('virtualNetworks_vNet_Peering_Name')]",
+                        "properties": {
+                            "peeringState": "Initiated",
+                            "remoteVirtualNetwork": {
+                                "id": "[parameters('virtualNetworks_vNet_Peering_ResourceId')]"
+                            },
+                            "allowVirtualNetworkAccess": true,
+                            "allowForwardedTraffic": false,
+                            "allowGatewayTransit": false,
+                            "useRemoteGateways": true,
+                            "remoteAddressSpace": {
+                                "addressPrefixes": [
+                                    "[parameters('virtualNetworks_vNet_Peering_Remote_Subnet')]"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_MultiSession_Subnet_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('virtualNetworks_MultiSession_Subnet')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_Static_Subnet_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('virtualNetworks_Static_Subnet')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_Random_Subnet_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('virtualNetworks_Random_Subnet')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_Mgt_Subnet_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('virtualNetworks_Mgt_Subnet')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_Server_Subnet_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('virtualNetworks_Server_Subnet')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('virtualNetworks_vNet_name'), '/', parameters('virtualNetworks_vNet_Peering_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vNet_name'))]"
+            ],
+            "properties": {
+                "remoteVirtualNetwork": {
+                    "id": "[parameters('virtualNetworks_vNet_Peering_ResourceId')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": false,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": true,
+                "remoteAddressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworks_vNet_Peering_Remote_Subnet')]"
+                    ]
+                }
+            }
+        }
+    ]
+}

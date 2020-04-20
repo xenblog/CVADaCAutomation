@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "[resourceGroup().location]"
+        },
+        "dnsServers": {
+            "value":  "172.16.10.10"
+        },
+        "virtualNetworks_vNet_name": {
+            "value": "WEU_CVAD_vNet"
+        },
+        "virtualNetworks_vNet_AddressSpace": {
+            "value": "10.3.0.0/16"
+        },
+        "virtualNetworks_Mgt_Subnet_Name": {
+            "value": "ManagementZone"
+        },
+        "virtualNetworks_Mgt_Subnet": {
+            "value":"10.3.10.0/25"
+        },
+        "virtualNetworks_Server_Subnet_Name": {
+            "value":"ServerZone"
+        },
+        "virtualNetworks_Server_Subnet": {
+            "value":"10.3.10.128/25"
+        },
+        "virtualNetworks_Static_Subnet_Name": {
+            "value":"AccessZone_Static"
+        },
+        "virtualNetworks_Static_Subnet": {
+            "value":"10.3.20.0/24"
+        },
+        "virtualNetworks_Random_Subnet_Name": {
+            "value":"AzzessZone_Random"
+        },
+        "virtualNetworks_Random_Subnet": {
+            "value":"10.3.30.0/24"
+        },
+        "virtualNetworks_MultiSession_Subnet_Name": {
+            "value":"AccessZone_MultiSession"
+        },
+        "virtualNetworks_MultiSession_Subnet": {
+            "value":"10.3.40.0/24"
+        },
+        "virtualNetworks_vNet_Peering_Name": {
+            "value": "CVAD-Hub"
+        },
+        "virtualNetworks_vNet_Peering_ResourceId": {
+            "value": "/subscriptions/adbd9a10-d215-4156-b35f-6898be0c1e51/resourceGroups/WEU-VPN-RG/providers/Microsoft.Network/virtualNetworks/WEU-VPN-vNet"
+        },
+        "virtualNetworks_vNet_Peering_Remote_Subnet": {
+            "value": "10.0.0.0/16"
+        }
+    }
+}

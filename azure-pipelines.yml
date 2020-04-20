@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include:
+      - master
+  
+pool:
+  vmImage: 'windows-2019'
+
+variables:
+  - name: WEU_KeyVault_RG
+    value: "WEU-CVADaC-Security-$(Build.BuildId)"
+  - name: subscription_id
+    value: "adbd9a10-d215-4156-b35f-6898be0c1e51"
+  - name: application_id
+    value: "bef2e804-b492-457c-bcb9-28df5fa2cd28"
+  - name: tenant_id
+    value: "272445fa-2ffb-4023-aa93-437667ebfec1"
+
+steps:
+  - task: PowerShell@2
+    displayName: "Connect to Azure"
+    inputs:
+      filePath: "connect-azure.ps1"
+      arguments: '-ServicePrincipalPassword "e8282a6b-795a-466a-b573-c671558c14b8" -SubscriptionId $(subscription_id) -ApplicationId $(application_id) -TenantId $(tenant_id)'
+    
+  - task: PowerShell@2
+    inputs:
+      targetType: "inline"
+      script: New-AzResourceGroup -Name $(WEU_KeyVault_RG) -Location westeurope -Force
